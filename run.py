@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from main.model import WFE, A_id, A_ab
+from pynuin.main.model import WFE, A_id, A_ab
 
 
 
