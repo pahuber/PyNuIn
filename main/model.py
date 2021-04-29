@@ -1,12 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from zernike import RZern
-import poppy as pp
-from matplotlib import cm
-from mpl_toolkits import mplot3d
 import sympy as sym
 from math import factorial
-import pylab as pb
 
 
 
