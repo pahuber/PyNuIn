@@ -26,8 +26,8 @@ for counterx, elx in enumerate(x):
         the = abs(np.arctan(ely/elx))
 
         # define wavefront error        
-        wfe1 = float(WFE(piston=1e-9,
-                         tiltx=1e-9,
+        wfe1 = float(WFE(piston=0,
+                         tiltx=0,
                          tilty=1e-9,
                          defocus=0,
                          rho=ra,
@@ -44,7 +44,7 @@ for counterx, elx in enumerate(x):
         i_min[counterx][countery] = abs(a_id - a_ab)**2
         null[counterx][countery] = (abs(a_id - a_ab)**2)/(abs(a_id + a_ab)**2)
         
-        img[counterx][countery] = Z(1, 1, ra, the)
+        img[counterx][countery] = Z(1, 1, ra, the) + Z(1, -1, ra, the)
 
 
 # plot matrices        
@@ -52,3 +52,6 @@ plt.imshow(null)
 # plt.title("Null Depth")
 plt.colorbar()
 plt.show()
+
+
+# test
