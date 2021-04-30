@@ -2,15 +2,10 @@ import numpy as np
 import sympy as sym
 from math import factorial
 
-
-
-
-
-#define Zernike polynomials
-
         
 # method to calculate radial part of Zernike polynomial
 def R(n, m, rho):
+    
     # if n-m even
     if (n-m) % 2 == 0:
         result = 0
@@ -24,11 +19,12 @@ def R(n, m, rho):
     elif rho == 1:
         return 1
 
+
 # method to calculate full Zernike polynomial, i. e. radial plus angular part
-# TODO: check arguments
 def Z(n, m, rho=sym.Symbol("rho"), theta=sym.Symbol("theta")):
+    
     # check if valid input
-    if n < 0 or m > n:
+    if n < 0 or m > n or abs(m) > n:
         print("Make sure that n >= 0 and |m| <= n")
     else:
         if m >= 0:
@@ -37,15 +33,25 @@ def Z(n, m, rho=sym.Symbol("rho"), theta=sym.Symbol("theta")):
             return R(n, abs(m), rho)*sym.sin(abs(m)*theta)
 
 
-def WFE(rho=sym.Symbol("rho"), theta=sym.Symbol("theta"), piston=0, tilty=0, tiltx=0, astig_oblique=0, defocus=0, astig_vertical=0):
+# method to simulate wavefront error (WFE) by summing several Zernike polynomials
+def WFE(rho=sym.Symbol("rho"),
+        theta=sym.Symbol("theta"),
+        piston=0,
+        tilty=0,
+        tiltx=0,
+        astig_oblique=0,
+        defocus=0,
+        astig_vertical=0):
+    
     return piston * Z(0, 0, rho, theta) + tilty * Z(1, -1, rho, theta) + tiltx * Z(1, 1, rho, theta) + astig_oblique * Z(2, -2, rho, theta) + defocus * Z(2, 0, rho, theta) + astig_vertical * Z(2, 2, rho, theta)
 
 
-
+# method to simulate an ideal wavefront amplitude
 def A_id(a0, t=sym.Symbol("t"), lam=450e-10, c=3e8):
     return a0 * np.exp(2j*np.pi*c*t/lam)
 
 
+# method to simulate an aberrated wafefront amplitude, requires the definition of a wavefront error
 def A_ab(a0, wfe, t=sym.Symbol("t"), lam=450e-10, rho=sym.Symbol("rho"), theta=sym.Symbol("theta"), c=3e8):
     return a0 * np.exp(2j*np.pi/lam*(c*t-wfe))
 
