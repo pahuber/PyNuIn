@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pynuin.main.model import WFE, A_id, A_ab, Z
+from pynuin.main.model import wfe, wfe_basic, amp_id, amp_ab, z
 
 
 
 # prepare matrices
-x = np.arange(-1, 1, 0.05)
-y = np.arange(-1, 1, 0.05)
+x = np.arange(-1, 1.05, 0.05)
+y = np.arange(-1, 1.05, 0.05)
 img = np.zeros((len(x), len(y)))
 amp_plus = np.zeros((len(x), len(y)))
 amp_minus = np.zeros((len(x), len(y)))
@@ -23,19 +23,23 @@ for counterx, elx in enumerate(x):
                 
         # perform transformation to polar coordinates
         ra = np.sqrt(elx**2+ely**2)
-        the = abs(np.arctan(ely/elx))
+        the = np.arctan2(ely, elx)
+        print(the)
 
         # define wavefront error        
-        wfe1 = float(WFE(piston=0,
-                         tiltx=0,
-                         tilty=1e-9,
+        wfe1 = float(wfe_basic(piston=0,
+                         tiltx=250e-9,
+                         tilty=250e-9,
                          defocus=0,
                          rho=ra,
                          theta=the))
         
+        list_wfe = [(1, 1, 250e-9), (1, -1, 250e-9)]
+        wfe_gen = float(wfe(list_wfe, rho=ra, theta=the))
+        
         # define amplitudes
-        a_id = A_id(1, t=0, lam=450e-9)
-        a_ab = A_ab(1, wfe1, t=0, lam=450e-9, rho=ra, theta=the)
+        a_id = amp_id(1, t=0, lam=450e-9)
+        a_ab = amp_ab(1, wfe_gen, t=0, lam=450e-9, rho=ra, theta=the)
         
         # define matrices
         amp_plus[counterx][countery] = a_id + a_ab
@@ -44,11 +48,11 @@ for counterx, elx in enumerate(x):
         i_min[counterx][countery] = abs(a_id - a_ab)**2
         null[counterx][countery] = (abs(a_id - a_ab)**2)/(abs(a_id + a_ab)**2)
         
-        img[counterx][countery] = Z(1, 1, ra, the) + Z(1, -1, ra, the)
+        img[counterx][countery] = z(1, 1, ra, the) + z(1, -1, ra, the)
 
 
 # plot matrices        
-plt.imshow(null)
+plt.imshow(img)
 # plt.title("Null Depth")
 plt.colorbar()
 plt.show()
