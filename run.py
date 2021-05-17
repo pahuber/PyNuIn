@@ -1,61 +1,97 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
-
-from pynuin.main.model import wfe, wfe_basic, amp_id, amp_ab, z
-
-
-
-# prepare matrices
-x = np.arange(-1, 1.05, 0.05)
-y = np.arange(-1, 1.05, 0.05)
-img = np.zeros((len(x), len(y)))
-amp_plus = np.zeros((len(x), len(y)))
-amp_minus = np.zeros((len(x), len(y)))
-i_max = np.zeros((len(x), len(y)))
-i_min = np.zeros((len(x), len(y)))
-null = np.zeros((len(x), len(y)))
+from pynuin.main.model import wfe
+from numpy.fft import fft2, fftshift
+from matplotlib.colors import LogNorm
+from matplotlib import ticker
 
 
+'''prepare matrices'''
+x = np.arange(-10, 10, 0.2)
+y = np.arange(-10, 10, 0.2)
 
-# calculate matrices
+wfe_img = np.zeros((len(x), len(y)))
+e_ideal = np.zeros((len(x), len(y)), dtype=complex)
+e_aberrated = np.zeros((len(x), len(y)), dtype=complex)
+e_sum = np.zeros((len(x), len(y)), dtype=complex)
+e_diff = np.zeros((len(x), len(y)), dtype=complex)
+
+
+'''calculations'''
 for counterx, elx in enumerate(x):
     for countery, ely in enumerate(y):
-                
+        
         # perform transformation to polar coordinates
         ra = np.sqrt(elx**2+ely**2)
         the = np.arctan2(ely, elx)
-        print(the)
+        
+        # define constants
+        a0 = 1
+        D_2 =0.5
+        lam = 1e-5
+        # rho_max = np.sqrt(max(x)**2+max(y)**2)
+        
+        # specify wafefront error
+        list_wfe = [(1, 1, 0.5e-5), (1, -1, 0.5e-5)]
+        wfe_gen = float(wfe(list_wfe, ra, the))
+        wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
 
-        # define wavefront error        
-        wfe1 = float(wfe_basic(piston=0,
-                         tiltx=250e-9,
-                         tilty=250e-9,
-                         defocus=0,
-                         rho=ra,
-                         theta=the))
+        # ideal e field
+        e_ideal[counterx][countery] = a0*np.heaviside(D_2-ra, 1)*np.heaviside(ra, 1)
         
-        list_wfe = [(1, 1, 250e-9), (1, -1, 250e-9)]
-        wfe_gen = float(wfe(list_wfe, rho=ra, theta=the))
-        
-        # define amplitudes
-        a_id = amp_id(1, t=0, lam=450e-9)
-        a_ab = amp_ab(1, wfe_gen, t=0, lam=450e-9, rho=ra, theta=the)
-        
-        # define matrices
-        amp_plus[counterx][countery] = a_id + a_ab
-        amp_minus[counterx][countery] = a_id - a_ab 
-        i_max[counterx][countery] = abs(a_id + a_ab)**2
-        i_min[counterx][countery] = abs(a_id - a_ab)**2
-        null[counterx][countery] = (abs(a_id - a_ab)**2)/(abs(a_id + a_ab)**2)
-        
-        img[counterx][countery] = z(1, 1, ra, the) + z(1, -1, ra, the)
+        # aberrated e field
+        e_aberrated[counterx][countery] = a0*np.heaviside(D_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
+
+# define e fields and irradiances
+e_sum = e_ideal + e_aberrated
+e_diff = e_ideal - e_aberrated
+irr_ideal = abs(fftshift(fft2(e_ideal)).real)**2
+irr_aberrated = abs(fftshift(fft2(e_aberrated)).real)**2
+irr_max = abs(fftshift(fft2(e_sum)).real)**2
+irr_min = abs(fftshift(fft2(e_diff)).real)**2
+
+# define null
+null = irr_min/irr_max
 
 
-# plot matrices        
-plt.imshow(img)
-# plt.title("Null Depth")
-plt.colorbar()
+'''plotting'''
+fig, axs = plt.subplots(2, 3)
+
+# ideal irradiance
+img1 = axs[0, 0].imshow(irr_ideal)
+fig.colorbar(img1, ax=axs[0, 0], fraction=0.046, pad=0.04)
+axs[0, 0].set_title("$I_{ideal}$")
+
+# maximum irradiance
+img2 = axs[0, 1].imshow(irr_max)
+fig.colorbar(img2, ax=axs[0, 1], fraction=0.046, pad=0.04)
+axs[0, 1].set_title("$I_{max}$")
+
+# wfe
+img3 = axs[0, 2].imshow(wfe_img)
+fig.colorbar(img3, ax=axs[0, 2], fraction=0.046, pad=0.04)
+axs[0, 2].set_title("WFE")
+
+# irr aberrated
+img5 = axs[1, 0].imshow(irr_aberrated)
+fig.colorbar(img5, ax=axs[1, 0], fraction=0.046, pad=0.04)
+axs[1, 0].set_title("$I_{aberrated}$")
+
+# minimum irradiance
+img6 = axs[1, 1].imshow(irr_min)
+fig.colorbar(img6, ax=axs[1, 1], fraction=0.046, pad=0.04)
+axs[1, 1].set_title("$I_{min}$")
+
+# null
+img7 = axs[1, 2].imshow(null, norm=LogNorm())
+cb = fig.colorbar(img7, ax=axs[1, 2], fraction=0.046, pad=0.04)
+# tick_locator = ticker.MaxNLocator(nbins=2)
+# cb.locator = tick_locator
+# cb.update_ticks()
+axs[1, 2].set_title("Null")
+
+# plt.tight_layout(pad=1.5)
+plt.subplots_adjust(wspace=0.6, hspace=0.21)
+plt.savefig("plot.pdf")
 plt.show()
-
-
-# test
