@@ -33,7 +33,7 @@ for counterx, elx in enumerate(x):
         # rho_max = np.sqrt(max(x)**2+max(y)**2)
         
         # specify wafefront error
-        list_wfe = [(1, 1, 0.5e-5), (1, -1, 0.5e-5)]
+        list_wfe = [(0, 0, 0.5e-5), (1, 1, 0e-5), (1, -1, 0e-5)]
         wfe_gen = float(wfe(list_wfe, ra, the))
         wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
 
@@ -52,7 +52,7 @@ irr_max = abs(fftshift(fft2(e_sum)).real)**2
 irr_min = abs(fftshift(fft2(e_diff)).real)**2
 
 # define null
-null = irr_min/irr_max
+# null = irr_min/irr_max
 
 
 '''plotting'''
@@ -84,14 +84,27 @@ fig.colorbar(img6, ax=axs[1, 1], fraction=0.046, pad=0.04)
 axs[1, 1].set_title("$I_{min}$")
 
 # null
-img7 = axs[1, 2].imshow(null, norm=LogNorm())
-cb = fig.colorbar(img7, ax=axs[1, 2], fraction=0.046, pad=0.04)
+# img7 = axs[1, 2].imshow(null, norm=LogNorm())
+# cb = fig.colorbar(img7, ax=axs[1, 2], fraction=0.046, pad=0.04)
 # tick_locator = ticker.MaxNLocator(nbins=2)
 # cb.locator = tick_locator
 # cb.update_ticks()
-axs[1, 2].set_title("Null")
+# axs[1, 2].set_title("Null")
 
 # plt.tight_layout(pad=1.5)
 plt.subplots_adjust(wspace=0.6, hspace=0.21)
 plt.savefig("plot.pdf")
 plt.show()
+
+
+
+# plt.imshow(null, norm=LogNorm())
+# plt.clim(-1e-18, 0)
+# plt.colorbar()
+
+# plt.show()
+# # cb = fig.colorbar(img7, ax=axs[1, 2], fraction=0.046, pad=0.04)
+# # tick_locator = ticker.MaxNLocator(nbins=2)
+# # cb.locator = tick_locator
+# # cb.update_ticks()
+# # axs[1, 2].set_title("Null")
