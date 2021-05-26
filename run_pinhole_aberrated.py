@@ -8,11 +8,12 @@ from matplotlib import ticker
 
 
 '''prepare matrices'''
-x = np.arange(-10, 10, 0.2)
-y = np.arange(-10, 10, 0.2)
+x = np.linspace(-5, 5, 100)#np.arange(-7, 7, 0.2)
+y = np.linspace(-5, 5, 100)#np.arange(-7, 7, 0.2)
 
 wfe_img = np.zeros((len(x), len(y)))
-aperture1 = np.zeros((len(x), len(y)))
+aperture1_plot = np.zeros((len(x), len(y)))
+aperture1 = np.zeros((len(x), len(y)), dtype=complex)
 aperture2prime = np.zeros((len(x), len(y)))
 e_ideal = np.zeros((len(x), len(y)), dtype=complex)
 e_aberrated = np.zeros((len(x), len(y)), dtype=complex)
@@ -31,35 +32,39 @@ for counterx, elx in enumerate(x):
         # define constants
         a0 = 1
         D1_2 = 0.8
-        D2_2 = 2.8
-        lam = 1e-5
-        # rho_max = np.sqrt(max(x)**2+max(y)**2)
         
+        D2_2 = 1.5
+        lam = 1e-5
+        
+        # # specify wafefront error
+        list_wfe = [(1, 1, 0.5e-5), (1, -1, 0.5e-5)]
+        wfe_gen = float(wfe(list_wfe, ra, the))
+        wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
         
         # define aprture 1
-        if ra <= D1_2:
-            aperture1[counterx][countery] = 1
-            
+        aperture1_plot[counterx][countery] = a0*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)
+        aperture1[counterx][countery] = a0*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
+        # if ra <= D1_2:
+        #     aperture1[counterx][countery] = a0
+        
         # define aperture 2
         if ra <= D2_2:
-            aperture2prime[counterx][countery] = 1
-        aperture2 = fftshift(ifft2(aperture2prime))
-        aperture2 = abs(aperture2.real)**2
-        
+            aperture2prime[counterx][countery] = a0
         
         # e field in aperture 1 plane
         e_field_a1 = fftshift(fft2(aperture1))
         intensity_a1 = abs(e_field_a1.real)**2
         
+        # e field in aperture 2 plane
+        e_field_a2 = e_field_a1 * aperture2prime
+        intensity_a2 = abs(e_field_a2.real)**2
+        
         # e field in imaging plane
-        e_field = ifft2(fftshift(fft2(aperture1)) * aperture2prime)
-        # e_field = fftshift(ifft2(fftshift(fft2(aperture1)) * fftshift(fft2(aperture2prime))))
+        e_field = ifft2(e_field_a2)
+        
+        # calculate intensity in image plane
         intensity = abs(e_field.real)**2
         
-        # # specify wafefront error
-        # list_wfe = [(0, 0, 0.5e-5), (1, 1, 0e-5), (1, -1, 0e-5)]
-        # wfe_gen = float(wfe(list_wfe, ra, the))
-        # wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
 
         # # ideal e field
         # e_ideal[counterx][countery] = a0*np.heaviside(D_2-ra, 1)*np.heaviside(ra, 1)
@@ -85,7 +90,7 @@ for counterx, elx in enumerate(x):
 fig, axs = plt.subplots(3, 2)
 
 # ideal irradiance
-img1 = axs[0, 0].imshow(aperture1)
+img1 = axs[0, 0].imshow(aperture1_plot)
 fig.colorbar(img1, ax=axs[0, 0], fraction=0.046, pad=0.04)
 axs[0, 0].set_title("A$_1$")
 
@@ -95,33 +100,34 @@ fig.colorbar(img2, ax=axs[0, 1], fraction=0.046, pad=0.04)
 axs[0, 1].set_title("A$_2$")
 
 # wfe
-img3 = axs[1, 0].imshow(intensity_a1)
-# img3.set_clim(0.5e1, np.amax(intensity_a1))
+img3 = axs[1, 0].imshow(e_field_a1.real)
+# img3.set_clim(1e-5, np.amax(intensity_a1))
 fig.colorbar(img3, ax=axs[1, 0], fraction=0.046, pad=0.04)
-axs[1, 0].set_title("Intenisty A$_1$")
-print(np.amax(intensity_a1))
+axs[1, 0].set_title("$\mathcal{R}(\mathcal{F}\{A_1\})$")
+
 
 # wfe
-img4 = axs[1, 1].imshow(intensity)
-# img4.set_clim(0.5e1, np.amax(intensity))
+img4 = axs[1, 1].imshow(e_field_a2.real)
+# img4.set_clim(1e-5, np.amax(intensity_a2))
 fig.colorbar(img4, ax=axs[1, 1], fraction=0.046, pad=0.04)
-axs[1, 1].set_title("Intenisty IP")
-print(np.amax(intensity))
-
-
-# difference between intensities
-img5 = axs[2, 0].imshow(intensity_a1/np.amax(intensity_a1)-intensity/np.amax(intensity))
-# img4.set_clim(0.5e1, np.amax(intensity))
-fig.colorbar(img5, ax=axs[2, 0], fraction=0.046, pad=0.04)
-axs[2, 0].set_title("Intenisty Diff")
+axs[1, 1].set_title("$\mathcal{R}(\mathcal{F}\{A_1\}\cdot A_2)$")
 
 
 
 # difference between intensities
-img6 = axs[2, 1].imshow(intensity_a1/np.amax(intensity_a1)-intensity/np.amax(intensity))
+img6 = axs[2, 0].imshow((e_field_a1 - e_field_a2).real)
 # img4.set_clim(0.5e1, np.amax(intensity))
-fig.colorbar(img6, ax=axs[2, 1], fraction=0.046, pad=0.04)
-axs[2, 1].set_title("Intenisty Diff")
+fig.colorbar(img6, ax=axs[2, 0], fraction=0.046, pad=0.04)
+axs[2, 0].set_title("$\mathcal{R}(\Delta E)$")
+
+
+# difference between intensities
+img5 = axs[2, 1].imshow(intensity)
+# img4.set_clim(0.5e1, np.amax(intensity))
+fig.colorbar(img5, ax=axs[2, 1], fraction=0.046, pad=0.04)
+axs[2, 1].set_title("$|\mathcal{R}(\mathcal{F}^{-1}\{\mathcal{F}\{A_1\}\cdot A_2\})|^2$")
+
+
 
 # # irr aberrated
 # img5 = axs[1, 0].imshow(irr_aberrated)

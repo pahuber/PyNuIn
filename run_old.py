@@ -111,9 +111,14 @@ for counterx, elx in enumerate(x):
         D_2 =0.4
         lam = 1e-5
         
+        if 4 < elx and elx < 6:
+            if 4 < ely and ely < 6:
+                test[counterx][countery] = 1
+            
         
-        if ra < D_2:
-            test[counterx][countery] = 1
+        
+        # if ra < D_2:
+            # test[counterx][countery] = 1
         
         # list_wfe = [(1, 1, 0.5e-5), (1, -1, 0.5e-5)]
         # # wfe_gen = float(wfe_cart(list_wfe, elx, ely, max(x), max(y)))
