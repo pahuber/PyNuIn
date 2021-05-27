@@ -1,7 +1,7 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.model import wfe
+from pynuin.main.zernike import wfe
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -43,7 +43,7 @@ for d2_2 in apertures:
             lam = 1e-5
             
             # # specify wafefront error
-            list_wfe = [(1, 1, 0.5e-5), (1, -1, 0.5e-5)]
+            list_wfe = [(2, -2, 0.5e-5)]
             wfe_gen = float(wfe(list_wfe, ra, the))
             wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
             

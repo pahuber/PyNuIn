@@ -1,7 +1,7 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.model import wfe
+from pynuin.main.zernike import wfe
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker

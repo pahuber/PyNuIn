@@ -1,7 +1,7 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.model import wfe
+from pynuin.main.zernike import wfe
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -33,11 +33,11 @@ for counterx, elx in enumerate(x):
         a0 = 1
         D1_2 = 0.8
         
-        D2_2 = 0.8
+        D2_2 = 0.6
         lam = 1e-5
         
         # # specify wafefront error
-        list_wfe = [(1, 1, 0.5e-6), (1, -1, 0.5e-6)]
+        list_wfe = [(2, -2, 0.8e-6)]
         wfe_gen = float(wfe(list_wfe, ra, the))
         wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
         
@@ -54,11 +54,15 @@ for counterx, elx in enumerate(x):
         # e field in aperture 1 plane
         e_field_a1_id = fftshift(fft2(aperture1_id))
         e_field_a1_ab = fftshift(fft2(aperture1_ab))
+        # e_field_a1_plus = fftshift(fft2(aperture1_id+aperture1_ab)) #direct
+        # e_field_a1_minus = fftshift(fft2(aperture1_id-aperture1_ab)) #direct
         # intensity_a1 = abs(e_field_a1.real)**2
         
         # e field in aperture 2 plane
         e_field_a2_id = e_field_a1_id * aperture2
         e_field_a2_ab = e_field_a1_ab * aperture2
+        # e_field_a2_plus = e_field_a1_plus * aperture2 #direct
+        # e_field_a2_minus = e_field_a1_minus * aperture2 #direct
         # intensity_a2 = abs(e_field_a2.real)**2
         
         # e field in imaging plane
@@ -66,6 +70,9 @@ for counterx, elx in enumerate(x):
         e_field_ab = ifft2(e_field_a2_ab)
         e_field_dirty_id = ifft2(e_field_a1_id)
         e_field_dirty_ab = ifft2(e_field_a1_ab)
+        
+        # e_field_plus = ifft2(e_field_a2_plus) #direct
+        # e_field_minus = ifft2(e_field_a2_minus) #direct
         
         # sum and diff of e fields
         e_plus = e_field_id + e_field_ab
@@ -82,6 +89,9 @@ for counterx, elx in enumerate(x):
         intensity_max_dirty = abs(e_plus_dirty.real)**2
         intensity_min_dirty = abs(e_minus_dirty.real)**2
         
+        # intensity_plus_direct = abs(e_field_plus.real)**2
+        # intensity_minus_direct = abs(e_field_minus.real)**2
+        
 
 
 # define null
@@ -96,7 +106,7 @@ nulld = imind/imaxd
 # print(imax)
 # print(imin)
 print(null)
-print(nulld)
+# print(np.sum(intensity_minus_direct)/np.sum(intensity_plus_direct))
 # null = irr_min/irr_max
         
 
