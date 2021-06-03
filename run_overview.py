@@ -1,8 +1,8 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.zernike import wfe
-from pynuin.tool.plot import plot_wfe
+from pynuin.main.zernike import wfe, get_coeff_from_rms
+from pynuin.tool.plot import plot_wfe, plot_wfe_from_rms
 from numpy.fft import fft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -20,9 +20,26 @@ from matplotlib import ticker
 
 
 
-list_wfe = [(1, 1, 1), (1, -1, 1)]
 
-plot_wfe(list_wfe)
+# list_wfe = [(1, -1, 1), (1, 1, 1), (2, 0, 1), (2, 2, 1), (2, -2, 1), (3, 0, 1), (3, 3, 1), (3, -3, 1), (3, 1, 1), (3, -1, 1), (4, 0, 1), (4, 2, 1), (4, -2, 1), (4, 4, 1), (4, -4, 1)]
+
+# plot_wfe(list_wfe)
+
+
+list_wfe_rms = [(1, -1), (1, 1)]
+
+coeff = get_coeff_from_rms(1, list_wfe_rms)
+
+for index in range(len(list_wfe_rms)):
+    list_wfe_rms[index] += (coeff,)
+
+print(list_wfe_rms)
+
+# list_wfe_rms2 = [(1, -1, coeff), (1, 1, coeff)]
+
+
+plot_wfe(list_wfe_rms)
+
 
 
 

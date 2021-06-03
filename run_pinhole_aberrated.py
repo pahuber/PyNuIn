@@ -1,10 +1,18 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.zernike import wfe
+from pynuin.main.zernike import wfe, get_coeff_from_rms
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
+from scipy.optimize import fsolve
+
+
+'''definitions'''
+D1_2 = 0.8
+D2_2 = 3
+lam = 1e-5
+list_wfe = [(2, -2, 0.5e-5), (2, 0, 0.5e-5)]
 
 
 '''prepare matrices'''
@@ -14,12 +22,65 @@ y = np.linspace(-5, 5, 100)#np.arange(-7, 7, 0.2)
 wfe_img = np.zeros((len(x), len(y)))
 aperture1_plot = np.zeros((len(x), len(y)))
 aperture1 = np.zeros((len(x), len(y)), dtype=complex)
+aperture1norm = np.zeros((len(x), len(y)), dtype=complex)
 aperture2prime = np.zeros((len(x), len(y)))
 e_ideal = np.zeros((len(x), len(y)), dtype=complex)
 e_aberrated = np.zeros((len(x), len(y)), dtype=complex)
 e_sum = np.zeros((len(x), len(y)), dtype=complex)
 e_diff = np.zeros((len(x), len(y)), dtype=complex)
 
+
+'''rms to zernike coefficient calculations'''
+coeff = get_coeff_from_rms(1e-5, [(1, 1)])
+print(coeff)
+    
+
+
+'''amplitude normalization'''
+for counterx, elx in enumerate(x):
+    for countery, ely in enumerate(y):
+        
+        # perform transformation to polar coordinates
+        ra = np.sqrt(elx**2+ely**2)
+        the = np.arctan2(ely, elx)
+        
+        # specify wavefront error
+        wfe_gen = float(wfe(list_wfe, ra, the, D1_2))
+        
+        # define aprture 1
+        aperture1norm[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
+
+# normalize this amplitude to unit intensity
+amplitude_temp = np.sum(aperture1norm)
+
+
+
+
+# choose initial amplitude imaginary part because of degeneracy
+a0_imag = amplitude_temp.imag
+
+# define function to find roots for
+def func(a0_real):
+    
+    func = 0
+    
+    for el1 in aperture1norm:
+        for el2 in el1:
+            z_real = el2.real
+            z_imag = el2.imag
+            
+            func += abs(a0_real*z_real - a0_imag*z_imag)**2
+            
+    return func - 1
+
+# solve for roots, i. e. real part of amplitude a0
+a0_real = fsolve(func, 1)[0]
+
+# define full complex amplitude a0
+a0 = a0_real + a0_imag*1j
+
+
+  
 
 '''calculations'''
 for counterx, elx in enumerate(x):
@@ -29,27 +90,19 @@ for counterx, elx in enumerate(x):
         ra = np.sqrt(elx**2+ely**2)
         the = np.arctan2(ely, elx)
         
-        # define constants
-        a0 = 1
-        D1_2 = 0.8
-        
-        D2_2 = 1.5
-        lam = 1e-5
-        
         # # specify wafefront error
-        list_wfe = [(2, -2, 0.8e-6)]
-        wfe_gen = float(wfe(list_wfe, ra, the))
-        wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the))
+        wfe_gen = float(wfe(list_wfe, ra, the, D1_2))
+        wfe_img[counterx][countery] = float(wfe(list_wfe, ra, the, D1_2))
         
         # define aprture 1
-        aperture1_plot[counterx][countery] = a0*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)
+        aperture1_plot[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)
         aperture1[counterx][countery] = a0*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
         # if ra <= D1_2:
         #     aperture1[counterx][countery] = a0
         
         # define aperture 2
         if ra <= D2_2:
-            aperture2prime[counterx][countery] = a0
+            aperture2prime[counterx][countery] = 1
         
         # e field in aperture 1 plane
         e_field_a1 = fftshift(fft2(aperture1))
@@ -83,14 +136,15 @@ for counterx, elx in enumerate(x):
 # define null
 # null = irr_min/irr_max
         
-
+# print initial intensity
+print(np.sum(abs(aperture1.real)**2))
 
 
 '''plotting'''
 fig, axs = plt.subplots(3, 2)
 
 # ideal irradiance
-img1 = axs[0, 0].imshow(aperture1_plot)
+img1 = axs[0, 0].imshow(aperture1.real)
 fig.colorbar(img1, ax=axs[0, 0], fraction=0.046, pad=0.04)
 axs[0, 0].set_title("A$_1$")
 
@@ -103,14 +157,14 @@ axs[0, 1].set_title("A$_2$")
 img3 = axs[1, 0].imshow(e_field_a1.real)
 # img3.set_clim(1e-5, np.amax(intensity_a1))
 fig.colorbar(img3, ax=axs[1, 0], fraction=0.046, pad=0.04)
-axs[1, 0].set_title("$\mathcal{R}(\mathcal{F}\{A_1\})$")
+axs[1, 0].set_title("$E_1$ Real")#"$\mathcal{R}(\mathcal{F}\{A_1\})$")
 
 
 # wfe
 img4 = axs[1, 1].imshow(e_field_a2.real)
 # img4.set_clim(1e-5, np.amax(intensity_a2))
 fig.colorbar(img4, ax=axs[1, 1], fraction=0.046, pad=0.04)
-axs[1, 1].set_title("$\mathcal{R}(\mathcal{F}\{A_1\}\cdot A_2)$")
+axs[1, 1].set_title("$E_2$ Real") #$\mathcal{R}(\mathcal{F}\{A_1\}\cdot A_2)$")
 
 
 
@@ -118,16 +172,18 @@ axs[1, 1].set_title("$\mathcal{R}(\mathcal{F}\{A_1\}\cdot A_2)$")
 img6 = axs[2, 0].imshow((e_field_a1 - e_field_a2).real)
 # img4.set_clim(0.5e1, np.amax(intensity))
 fig.colorbar(img6, ax=axs[2, 0], fraction=0.046, pad=0.04)
-axs[2, 0].set_title("$\mathcal{R}(\Delta E)$")
+axs[2, 0].set_title("$E_1 - E_2$")#"$\mathcal{R}(\Delta E)$")
 
 
 # difference between intensities
 img5 = axs[2, 1].imshow(intensity)
 # img4.set_clim(0.5e1, np.amax(intensity))
 fig.colorbar(img5, ax=axs[2, 1], fraction=0.046, pad=0.04)
-axs[2, 1].set_title("$|\mathcal{R}(\mathcal{F}^{-1}\{\mathcal{F}\{A_1\}\cdot A_2\})|^2$")
+intensity_final = round(np.sum(intensity), 2)
+axs[2, 1].set_title("$I_{fin} = $" + str(intensity_final) + " $I_{init}$")#"$|\mathcal{R}(\mathcal{F}^{-1}\{\mathcal{F}\{A_1\}\cdot A_2\})|^2$")
 
-
+# print final intensity as a fraction of the initial intensity
+print(np.sum(intensity))
 
 # # irr aberrated
 # img5 = axs[1, 0].imshow(irr_aberrated)
