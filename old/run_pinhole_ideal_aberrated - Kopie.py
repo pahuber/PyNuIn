@@ -43,6 +43,64 @@ e_sum = np.zeros((len(x), len(y)), dtype=complex)
 e_diff = np.zeros((len(x), len(y)), dtype=complex)
 
 
+# '''amplitude normalization ideal'''
+# for counterx, elx in enumerate(x):
+#     for countery, ely in enumerate(y):
+        
+#         # perform transformation to polar coordinates
+#         ra = np.sqrt(elx**2+ely**2)
+        
+#         # define aprture 1
+#         if ra <= D1_2:
+#             aperture1_id_norm[counterx][countery] = 1
+            
+# a0_id = abs(np.sqrt(1/np.sum(aperture1_id_norm))) # such that the intensity over the aperture 1 is unity
+
+
+# '''amplitude normalization aberrated'''
+# for counterx, elx in enumerate(x):
+#     for countery, ely in enumerate(y):
+        
+#         # perform transformation to polar coordinates
+#         ra = np.sqrt(elx**2+ely**2)
+#         the = np.arctan2(ely, elx)
+        
+#         # specify wavefront error
+#         wfe_gen = float(wfe(list_wfe, ra, the, D1_2))
+        
+#         # define aprture 1
+#         aperture1_ab_norm[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
+
+# # normalize this amplitude to unit intensity
+# amplitude_temp = np.sum(aperture1_ab_norm)
+
+# # choose initial amplitude imaginary part because of degeneracy
+# a0_imag = amplitude_temp.imag
+
+# # define function to find roots for
+# def func(a0_real):
+    
+#     func = 0
+    
+#     for el1 in aperture1_ab_norm:
+#         for el2 in el1:
+#             z_real = el2.real
+#             z_imag = el2.imag
+            
+#             func += abs(a0_real*z_real - a0_imag*z_imag)**2
+            
+#     return func - 1
+
+# # solve for roots, i. e. real part of amplitude a0
+# a0_real = fsolve(func, 1)[0]
+
+# # define full complex amplitude a0
+# a0_ab = a0_real + a0_imag*1j
+
+
+
+
+
 '''amplitude normalization common'''
 for counterx, elx in enumerate(x):
     for countery, ely in enumerate(y):
@@ -58,6 +116,7 @@ for counterx, elx in enumerate(x):
         aperture1_id_norm[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)
         aperture1_ab_norm[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
         
+
 # normalize this amplitude to unit intensity
 aperture1_common  = aperture1_id_norm + aperture1_ab_norm
 amplitude_temp = np.sum(aperture1_common)
@@ -149,6 +208,8 @@ for counterx, elx in enumerate(x):
         
         # intensity_plus_direct = abs(e_field_plus.real)**2
         # intensity_minus_direct = abs(e_field_minus.real)**2
+    
+
 
 # define null
 imax = np.sum(intensity_max)
@@ -166,6 +227,7 @@ nulld = imind/imaxd
 # I_init total (|E_1 + E_2|^2)
 iinit_common = np.sum(abs((aperture1_id + aperture1_ab).real)**2)
 
+
 # I_init separat
 iinit = np.sum(abs(aperture1_id.real)**2) + np.sum(abs(aperture1_ab.real)**2)
 
@@ -173,6 +235,8 @@ iinit = np.sum(abs(aperture1_id.real)**2) + np.sum(abs(aperture1_ab.real)**2)
 
 # print(np.sum(abs(aperture1_id.real)**2)) #iinit id
 # print(np.sum(abs(aperture1_ab.real)**2)) # iinit ab
+
+
 
 # print(imax)
 # print(iinit) #iinit sep
@@ -185,29 +249,30 @@ print("Throughput: " + str(round(imax/iinit_common * 100, 1)) + " %")
 # null = irr_min/irr_max
         
 
+
+
 '''plotting'''
 fig, axs = plt.subplots(3, 2)
-extent = [xymin, xymax, xymin, xymax]
 
 # ideal irradiance
-img1 = axs[0, 0].imshow(aperture1_id.real, extent=extent)
+img1 = axs[0, 0].imshow(aperture1_id.real)
 fig.colorbar(img1, ax=axs[0, 0], fraction=0.046, pad=0.04)
 axs[0, 0].set_title("A$_1$")
 
 # maximum irradiance
-img2 = axs[0, 1].imshow(aperture2, extent=extent)
+img2 = axs[0, 1].imshow(aperture2)
 fig.colorbar(img2, ax=axs[0, 1], fraction=0.046, pad=0.04)
 axs[0, 1].set_title("A$_2$")
 
 # wfe
-img3 = axs[1, 0].imshow(e_field_a2_id.real, extent=extent)
+img3 = axs[1, 0].imshow(e_field_a2_id.real)
 # img3.set_clim(1e-5, np.amax(intensity_a1))
 fig.colorbar(img3, ax=axs[1, 0], fraction=0.046, pad=0.04)
 axs[1, 0].set_title("E id clean")
 
 
 # wfe
-img4 = axs[1, 1].imshow(e_field_a2_ab.real, extent=extent)
+img4 = axs[1, 1].imshow(e_field_a2_ab.real)
 # img4.set_clim(1e-5, np.amax(intensity_a2))
 fig.colorbar(img4, ax=axs[1, 1], fraction=0.046, pad=0.04)
 axs[1, 1].set_title("E ab clean")
@@ -215,14 +280,14 @@ axs[1, 1].set_title("E ab clean")
 
 
 # difference between intensities
-img6 = axs[2, 0].imshow(intensity_max, extent=extent)
+img6 = axs[2, 0].imshow(intensity_max)
 # img4.set_clim(0.5e1, np.amax(intensity))
 fig.colorbar(img6, ax=axs[2, 0], fraction=0.046, pad=0.04)
 axs[2, 0].set_title("I max")
 
 
 # difference between intensities
-img5 = axs[2, 1].imshow(intensity_min, extent=extent)
+img5 = axs[2, 1].imshow(intensity_min)
 # img4.set_clim(0.5e1, np.amax(intensity))
 fig.colorbar(img5, ax=axs[2, 1], fraction=0.046, pad=0.04)
 axs[2, 1].set_title("I min")

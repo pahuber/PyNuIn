@@ -53,47 +53,37 @@ def wfe(indices_coeffs,
     return summation
 
 
+# def get_coeff_from_rms(rms, indices):
+    
+#     def integrand1(rho, theta, coeff, indices):        
+#         wfe = 0
+#         for el in indices:
+#             n = el[0]
+#             m = el[1]
+#             wfe += coeff * z(n, m, rho, theta)
+            
+#         return wfe**2*rho
+    
+#     def integrand2(rho, theta, coeff, indices):        
+#         wfe = 0
+#         for el in indices:
+#             n = el[0]
+#             m = el[1]
+#             wfe += coeff * z(n, m, rho, theta)
+            
+#         return wfe*rho
+    
+#     def func(coeff):
+#         part1 = 1/np.pi* dblquad(integrand1, 0, 2*np.pi, lambda rho: 0, lambda rho:1, args=(coeff, indices))[0]
+#         part2 = 1/np.pi**2* (dblquad(integrand2, 0, 2*np.pi, lambda rho: 0, lambda rho:1, args=(coeff, indices))[0])**2
+#         function = np.sqrt(part1 - part2)
+#         return function - rms
+    
+#     coeff = fsolve(func, 1e-5)[0]
+    
+#     return coeff
+
+
 def get_coeff_from_rms(rms, indices):
     
-    def integrand1(rho, theta, coeff, indices):        
-        wfe = 0
-        for el in indices:
-            n = el[0]
-            m = el[1]
-            wfe += coeff * z(n, m, rho, theta)
-            
-        return wfe**2*rho
-    
-    def integrand2(rho, theta, coeff, indices):        
-        wfe = 0
-        for el in indices:
-            n = el[0]
-            m = el[1]
-            wfe += coeff * z(n, m, rho, theta)
-            
-        return wfe*rho
-    
-    def func(coeff):
-        part1 = 1/np.pi* dblquad(integrand1, 0, 2*np.pi, lambda rho: 0, lambda rho:1, args=(coeff, indices))[0]
-        part2 = 1/np.pi**2* (dblquad(integrand2, 0, 2*np.pi, lambda rho: 0, lambda rho:1, args=(coeff, indices))[0])**2
-        function = np.sqrt(part1 - part2)
-        return function - rms
-    
-    coeff = fsolve(func, 1e-5)[0]
-    
-    return coeff
-
-
-def get_wfe_from_rms(rms, indices, rho, theta, rho_max=1):
-    
-    coeff = get_coeff_from_rms(rms, indices)
-    
-    summation = 0
-    for el in indices:
-        n = el[0]
-        m = el[1]
-        summation += coeff * z(n, m, rho, theta, rho_max)
-        
-    return summation
-    
-    
+    return abs(rms/np.sqrt(len(indices)))
