@@ -10,15 +10,10 @@ from matplotlib import ticker
 from scipy.optimize import fsolve
 
 
-'''computational specifications'''
-n = 100
-size = n**2
-
-
-'''physical specificaations'''
-lam = 1 #1e-5 #m
-D1 = 20 #0.01 #m
-D2 = 2 * 1.22 * (lam/D1) * n #lam/D (units)
+'''definitions'''
+lam = 1e-5 #1e-5 #m
+D1 = 0.01 #0.01 #m
+D2 = 20 * 1.22 * (lam/D1) #lam/D (units)
 list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
 rms = 0.1*lam
 
@@ -32,20 +27,31 @@ for index in range(len(list_wfe)):
     list_wfe[index] += (coeff,)
 
 
+'''matrix infos'''
+xymin = -0.05
+xymax = 0.05
+steps = 100
+size = steps**2
+
+
 '''create apertures'''
 # create ideal aperture
 a1_id = aperture(D = D1, 
-                 lam = lam,
-                 a0 = 1,
-                 list_wfe = None,
-                 n = n)
+              lam = lam,
+              a0 = 1,
+              list_wfe = None,
+              xymin = xymin,
+              xymax = xymax,
+              steps = steps)
 
 # create aberrated aperture
 a1_ab = aperture(D = D1, 
-                 lam = lam,
-                 a0 = 1,
-                 list_wfe = list_wfe,
-                 n = n)
+              lam = lam,
+              a0 = 1,
+              list_wfe = list_wfe,
+              xymin = xymin,
+              xymax = xymax,
+              steps = steps)
 
 
 
@@ -57,9 +63,9 @@ a1_ab = aperture(D = D1,
 # a1_id = a1_id/size
 # a1_ab = a1_ab/size
 
-# print(a1_id.shape)
-# print(np.sum(a1_id))
-# print(np.sum(a1_ab))
+print(a1_id.shape)
+print(np.sum(a1_id))
+print(np.sum(a1_ab))
 
 # print(a0)
 
@@ -68,7 +74,9 @@ a2 = aperture(D = D2,
               lam = lam,
               a0 = 1,
               list_wfe = None,
-              n = n)
+              xymin = xymin,
+              xymax = xymax,
+              steps = steps)
 
 
 '''calculations'''
@@ -91,26 +99,21 @@ intensity_max = abs(e_plus.real)**2
 intensity_min = abs(e_minus.real)**2
 
 # define null
-imax = np.sum(intensity_max)/intensity_max.size
-imin = np.sum(intensity_min)/intensity_max.size
+imax = np.sum(intensity_max)#/intensity_max.size
+imin = np.sum(intensity_min)#/intensity_max.size
 null = imin/imax
-
-# calculate initial common intensity, should equal intensity_init from above, i. e. I_init total (|E_1 + E_2|^2)
-iinit_common = np.sum(abs((a1_id + a1_ab).real)**2)/intensity_max.size
-
-# prints
 print(imax)
+# calculate initial common intensity, should equal intensity_init from above, i. e. I_init total (|E_1 + E_2|^2)
+iinit_common = np.sum(abs((a1_id + a1_ab).real)**2)#/intensity_max.size
 print(iinit_common)
 
 print("Common initial intensity: " + str(iinit_common))
-print("Null: " + str(null))
+print("Null: " + str(round(null, 10)))
 print("Throughput: " + str(round(imax/iinit_common * 100, 1)) + " %")
 
 
 '''plotting'''
 fig, axs = plt.subplots(3, 2)
-xymin = -n/2
-xymax = n/2
 extent = [xymin, xymax, xymin, xymax]
 
 # ideal aperture 1

@@ -17,29 +17,37 @@ size = n**2
 '''physical specifications'''
 lam = 1 #1e-5 #m
 D1 = 20 #0.01 #m
-# list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
-list_wfe = [(5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
-# list_wfe = [(2, 0)]
+list_wfe = [(1, 1), (1, -1), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
+
+
 pinholes = np.arange(1*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
-rmss = np.arange(0.01*lam, 0.26*lam, 0.01*lam)
+# rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
+
+rms = 0.01*lam
 
 print(len(pinholes))
-print(len(rmss))
-print(len(pinholes) * len(rmss))
+print(len(list_wfe))
+print(len(pinholes) * len(list_wfe))
 
 # define output arrays
-output_null = np.zeros((len(rmss), len(pinholes)))
-output_throughput = np.zeros((len(rmss), len(pinholes)))
+output_null = np.zeros((len(list_wfe), len(pinholes)))
+output_throughput = np.zeros((len(list_wfe), len(pinholes)))
 
+# create ylabel list
+wfe_labels = []
+
+for el in list_wfe:
+    wfe_labels.append(str(el[0]) + ", " + str(el[1]))
+    
 
 '''start loop'''
-for counter_rms, rms in enumerate(rmss):
+for counter_wfe, wfe1 in enumerate(list_wfe):
     
     '''rms to zernike coefficient calculations'''
-    list_wfe2 = list_wfe.copy()
-    coeff = get_coeff_from_rms(rms, list_wfe2)
-    for index in range(len(list_wfe)):
-        list_wfe2[index] += (coeff,)
+    # list_wfe2 = list_wfe.copy()
+    # coeff = get_coeff_from_rms(rms, list_wfe2)
+    # for index in range(len(list_wfe)):
+    #     list_wfe2[index] += (coeff,)
     
     
     '''create apertures'''
@@ -54,7 +62,7 @@ for counter_rms, rms in enumerate(rmss):
     a1_ab = aperture(D = D1, 
                  lam = lam,
                  a0 = 1,
-                 list_wfe = list_wfe2,
+                 list_wfe = [wfe1 + (rms,)],
                  n = n)
     
     
@@ -107,8 +115,8 @@ for counter_rms, rms in enumerate(rmss):
         # print("Null: " + str(round(null, 10)))
         # print("Throughput: " + str(round(imax/iinit_common * 100, 1)) + " %")
         
-        output_null[counter_rms][counter_pinhole] = null
-        output_throughput[counter_rms][counter_pinhole] = throughput
+        output_null[counter_wfe][counter_pinhole] = null
+        output_throughput[counter_wfe][counter_pinhole] = throughput
         
         # if counter_rms == 2 and counter_pinhole == 0:
             # print(rms)
@@ -120,10 +128,10 @@ for counter_rms, rms in enumerate(rmss):
 '''plotting'''
 pmin = np.min(pinholes)
 pmax = np.max(pinholes)
-rmin = np.min(rmss)
-rmax = np.max(rmss)
+rmin = 1
+rmax = len(list_wfe)
 ppixel = (pmax-pmin)/len(pinholes)/2
-rpixel = (rmax-rmin)/len(rmss)/2
+rpixel = (rmax-rmin)/len(list_wfe)/2
 extent = [pmin-ppixel, pmax+ppixel, rmin-rpixel, rmax+rpixel]
 aspect = ((pmax-pmin)/output_null.shape[1]) / ((rmax-rmin)/output_null.shape[0])
 tcontours = [0.75, 0.80, 0.85, 0.90]
@@ -137,44 +145,47 @@ ncolor="black"
 # throughput
 fig1, axs1 = plt.subplots(1, 1)
 img1 = axs1.imshow(output_throughput, extent=extent, aspect=aspect, origin="lower", cmap=cmap)
-cs1 = axs1.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
-axs1.clabel(cs1, cs1.levels, inline=True, fmt="%1.2f", fontsize=10)
 
-cs12 = axs1.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
-axs1.clabel(cs12, cs12.levels, inline=True, fmt="%.0E", fontsize=10)
+# cs1 = axs1.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
+# axs1.clabel(cs1, cs1.levels, inline=True, fmt="%1.2f", fontsize=10)
+
+# cs12 = axs1.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
+# axs1.clabel(cs12, cs12.levels, inline=True, fmt="%.0E", fontsize=10)
 
 fig1.colorbar(img1, ax=axs1, fraction=0.046, pad=0.04)
 axs1.set_xticks(pinholes)
 axs1.set_xticklabels((pinholes/lam/n*D1).round(2))
-axs1.set_yticks(rmss)
-axs1.set_title("Throughput")
+axs1.set_yticks(np.arange(1, len(list_wfe)+1))
+axs1.set_yticklabels(wfe_labels)
+axs1.set_title("Throughput (RMS: " + str(rms/lam) + " $\lambda$)")
 plt.xlabel("Pinhole Diameter [$\lambda/D$]")
-plt.ylabel("RMS [$\lambda$]")
+plt.ylabel("Zernike Polynomial $Z_n^m$ [$n, m$]")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
-fig1.savefig("rms_throughput.pdf", bbox_inches = 'tight', pad_inches = 0)
+fig1.savefig("zernike_throughput.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 # null
 fig2, axs2 = plt.subplots(1, 1)
 img2 = axs2.imshow(output_null, norm=LogNorm(), extent=extent, aspect=aspect, origin="lower", cmap=cmap_r)
 
-cs2 = axs2.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
-axs2.clabel(cs2, cs2.levels, inline=True, fmt="%1.2f", fontsize=10)
+# cs2 = axs2.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
+# axs2.clabel(cs2, cs2.levels, inline=True, fmt="%1.2f", fontsize=10)
 
-cs22 = axs2.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
-axs2.clabel(cs22, cs22.levels, inline=True, fmt="%.0E", fontsize=10)
+# cs22 = axs2.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
+# axs2.clabel(cs22, cs22.levels, inline=True, fmt="%.0E", fontsize=10)
 
 fig2.colorbar(img2, ax=axs2, fraction=0.046, pad=0.04)
 axs2.set_xticks(pinholes)
 axs2.set_xticklabels((pinholes/lam/n*D1).round(2))
-axs2.set_yticks(rmss)
-axs2.set_title("Null Depth")
+axs2.set_yticks(np.arange(1, len(list_wfe)+1))
+axs2.set_yticklabels(wfe_labels)
+axs2.set_title("Null Depth (RMS: " + str(rms/lam) + " $\lambda$)")
 plt.xlabel("Pinhole Diameter [$\lambda/D$]")
-plt.ylabel("RMS [$\lambda$]")
+plt.ylabel("Zernike Polynomial $Z_n^m$ [$n, m$]")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
-fig2.savefig("rms_null.pdf", bbox_inches = 'tight', pad_inches = 0)
+fig2.savefig("zernike_null.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 plt.show()

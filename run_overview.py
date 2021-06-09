@@ -1,7 +1,8 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.zernike import wfe, get_coeff_from_rms, get_coeff_from_rms2
+from pynuin.main.zernike import wfe, get_coeff_from_rms
+from pynuin.main.optics import aperture, aperture2
 from pynuin.util.plot import plot_wfe
 from numpy.fft import fft2, fftshift
 from matplotlib.colors import LogNorm
@@ -19,20 +20,54 @@ from matplotlib import ticker
 # e_diff = np.zeros((len(x), len(y)), dtype=complex)
 
 
+lam = 1e-5 #1e-5 #m
+D1 = 0.01 #0.01 #m
 
+xymin = -0.05
+xymax = 0.05
+steps = 500
+size = steps**2
+
+a1_id = aperture(D = D1, 
+              lam = lam,
+              a0 = 1,
+              list_wfe = None,
+              xymin = xymin,
+              xymax = xymax,
+              steps = steps)
+
+
+plt.imshow(a1_id.real)
+plt.colorbar()
+plt.show()
+
+
+a2 = aperture2(D = 20, 
+             lam = 1,
+             a0 = 1,
+             list_wfe = [(2, 2, 0.5)],
+             n = 300)
+
+intensity = abs(fftshift(fft2(a2)))**2
+print(np.sum(intensity)/intensity.size)
+
+# plt.imshow(abs(fftshift(fft2(a2))))
+plt.imshow(a2.real)
+plt.colorbar()
+plt.show()
 
 # list_wfe = [(1, -1, 1), (1, 1, 1), (2, 0, 1), (2, 2, 1), (2, -2, 1), (3, 0, 1), (3, 3, 1), (3, -3, 1), (3, 1, 1), (3, -1, 1), (4, 0, 1), (4, 2, 1), (4, -2, 1), (4, 4, 1), (4, -4, 1)]
 
 # plot_wfe(list_wfe)
 
 
-list_wfe_rms = [(1, -1), (1, 1), (2, -2), (4, 2)]
+# list_wfe_rms = [(1, -1), (1, 1), (2, -2), (4, 2)]
 
-# coeff = get_coeff_from_rms(1, list_wfe_rms)
-coeff2 = get_coeff_from_rms2(1, list_wfe_rms)
+# # coeff = get_coeff_from_rms(1, list_wfe_rms)
+# coeff2 = get_coeff_from_rms2(1, list_wfe_rms)
 
-# print(coeff)
-print(coeff2)
+# # print(coeff)
+# print(coeff2)
 
 # for index in range(len(list_wfe_rms)):
     # list_wfe_rms[index] += (coeff,)

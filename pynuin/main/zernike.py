@@ -24,14 +24,14 @@ def r(n, m, r, r_max):
     if (n-m) % 2 == 0:
         
         # if rho is one
-        if r == r_max:
-            return 1
+        # if r == r_max:
+        #     return 1
         
-        else:
-            result = 0
-            for k in np.arange(0, (n-m)/2+1, 1):
-                result += ((-1)**k*factorial(n-k))/(factorial(k)*factorial((n+m)/2-k)*factorial((n-m)/2-k))*(r/r_max)**(n-2*k)
-            return result
+        # else:
+        result = 0
+        for k in np.arange(0, (n-m)/2+1, 1):
+            result += ((-1)**k*factorial(n-k))/(factorial(k)*factorial((n+m)/2-k)*factorial((n-m)/2-k))*(r/r_max)**(n-2*k)
+        return result
     # if n-m odd
     elif (n-m) % 2 != 0:
         return 0
@@ -62,7 +62,7 @@ def wfe(indices_coeffs,
         n = el[0]
         m = el[1]
         coeff = el[2]
-        summation += coeff * z(n, m, rho, theta, rho_max)
+        summation += coeff * z(n, m, rho, theta, rho_max)        
         
     return summation
 
