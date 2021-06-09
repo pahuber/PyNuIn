@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pynuin.main.zernike import wfe, get_coeff_from_rms
+from pynuin.main.optics import aperture
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -19,11 +20,16 @@ D1_2 = D1/2 #m
 D2_2 = D2/2 #lam/D (units)
 
 
+
+
+
 '''rms to zernike coefficient calculations'''
 coeff = get_coeff_from_rms(rms, list_wfe)
 for index in range(len(list_wfe)):
     list_wfe[index] += (coeff,)
     
+
+# aperturex = aperture(D1, list_wfe=list_wfe)
 
 '''prepare matrices'''
 xymin = -5

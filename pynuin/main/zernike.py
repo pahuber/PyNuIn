@@ -6,21 +6,35 @@ from scipy.optimize import fsolve
 from scipy.integrate import dblquad
         
 
-# method to calculate radial part of Zernike polynomial
-def r(n, m, rho, rho_max):
+def r(n, m, r, r_max):
+    '''
+    Returns the radial part of Zernike polynomials.
+
+            Parameters:
+                    n (int): First index of Zernike polynomial
+                    m (int): Second index of Zernike polynomial
+                    r (float): Radial coordinate
+                    r_max (float): Maximum of radial coordinate, such that rho=r/r_max in [0, 1]
+
+            Returns:
+                    r (): Radial part of Zernike polynomial
+    '''
     
     # if n-m even
     if (n-m) % 2 == 0:
-        result = 0
-        for k in np.arange(0, (n-m)/2+1, 1):
-            result += ((-1)**k*factorial(n-k))/(factorial(k)*factorial((n+m)/2-k)*factorial((n-m)/2-k))*(rho/rho_max)**(n-2*k)
-        return result
+        
+        # if rho is one
+        if r == r_max:
+            return 1
+        
+        else:
+            result = 0
+            for k in np.arange(0, (n-m)/2+1, 1):
+                result += ((-1)**k*factorial(n-k))/(factorial(k)*factorial((n+m)/2-k)*factorial((n-m)/2-k))*(r/r_max)**(n-2*k)
+            return result
     # if n-m odd
     elif (n-m) % 2 != 0:
         return 0
-    # if rho is one
-    elif rho == 1:
-        return 1
     
 
 # method to calculate full Zernike polynomial, i. e. radial plus angular part
@@ -32,9 +46,9 @@ def z(n, m, rho, theta, rho_max=1):
     else:
         norm = np.sign(m)*np.sqrt((2*(n+1))/(1+kronecker_delta(m, 0)))
         if m >= 0:
-            return norm*r(n, m, rho, rho_max)*sym.cos(m*theta)
+            return norm*r(n, m, rho, rho_max)*np.cos(m*theta)
         else:
-            return norm*r(n, abs(m), rho, rho_max)*sym.sin(abs(m)*theta)
+            return norm*r(n, abs(m), rho, rho_max)*np.sin(abs(m)*theta)
         
 
 # method to simulate general wavefront error

@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pynuin.main.zernike import wfe
+from pynuin.main.optics import aperture
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -15,6 +16,8 @@ D2 = 2 * 1.22 * (lam/D1) #lam/D (units)
 D1_2 = D1/2 #m
 D2_2 = D2/2 #lam/D (units)
 
+
+# aperturex = aperture(D1)
 
 
 '''prepare matrices'''
