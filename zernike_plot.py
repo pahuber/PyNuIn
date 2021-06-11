@@ -163,7 +163,7 @@ plt.ylabel("Zernike Polynomial $Z_n^m$ [$n, m$]")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
-fig1.savefig("zernike_throughput.pdf", bbox_inches = 'tight', pad_inches = 0)
+fig1.savefig("output/zernike_throughput.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 # null
 fig2, axs2 = plt.subplots(1, 1)
@@ -186,6 +186,6 @@ plt.ylabel("Zernike Polynomial $Z_n^m$ [$n, m$]")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
-fig2.savefig("zernike_null.pdf", bbox_inches = 'tight', pad_inches = 0)
+fig2.savefig("output/zernike_null.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 plt.show()

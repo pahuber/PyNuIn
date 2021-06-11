@@ -91,12 +91,12 @@ intensity_max = abs(e_plus.real)**2
 intensity_min = abs(e_minus.real)**2
 
 # define null
-imax = np.sum(intensity_max)/intensity_max.size
-imin = np.sum(intensity_min)/intensity_max.size
+imax = np.sum(intensity_max)#/intensity_max.size
+imin = np.sum(intensity_min)#/intensity_max.size
 null = imin/imax
 
 # calculate initial common intensity, should equal intensity_init from above, i. e. I_init total (|E_1 + E_2|^2)
-iinit_common = np.sum(abs((a1_id + a1_ab).real)**2)/intensity_max.size
+iinit_common = np.sum(abs((a1_id + a1_ab).real)**2)#/intensity_max.size
 
 # prints
 print(imax)

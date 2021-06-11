@@ -59,7 +59,9 @@ for counter_rms, rms in enumerate(rmss):
     
     
     # normalize apertures
-    #a1_id, a1_ab, _ = normalize_apertures(a1_id, a1_ab, 1)
+    print("Normalizing")
+    a1_id, a1_ab, _ = normalize_apertures(a1_id, a1_ab, 1)
+    print("Ended normalizing")
     
     
     for counter_pinhole, pinhole in enumerate(pinholes):
@@ -153,7 +155,7 @@ plt.ylabel("RMS [$\lambda$]")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
-fig1.savefig("rms_throughput.pdf", bbox_inches = 'tight', pad_inches = 0)
+fig1.savefig("output/rms_throughput.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 # null
 fig2, axs2 = plt.subplots(1, 1)
@@ -175,6 +177,6 @@ plt.ylabel("RMS [$\lambda$]")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
-fig2.savefig("rms_null.pdf", bbox_inches = 'tight', pad_inches = 0)
+fig2.savefig("output/rms_null.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 plt.show()
