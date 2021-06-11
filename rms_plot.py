@@ -10,18 +10,18 @@ from scipy.optimize import fsolve
 
 
 '''computational specifications'''
-n = 100
+n = 200
 size = n**2
 
 
 '''physical specifications'''
 lam = 1 #1e-5 #m
 D1 = 20 #0.01 #m
-# list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
-list_wfe = [(5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
+list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
+# list_wfe = [(5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
 # list_wfe = [(2, 0)]
 pinholes = np.arange(1*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
-rmss = np.arange(0.01*lam, 0.26*lam, 0.01*lam)
+rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
 
 print(len(pinholes))
 print(len(rmss))
