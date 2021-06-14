@@ -20,7 +20,7 @@ def plot_wfe(list_wfe):
             
             # calculate image
             if rho <= 1:
-                wfe_img[counterx][countery] = float(wfe(list_wfe, rho, theta))
+                wfe_img[counterx][countery] = float(wfe(list_wfe, rho, theta, 1))
             
     # plot image
     plt.imshow(wfe_img)

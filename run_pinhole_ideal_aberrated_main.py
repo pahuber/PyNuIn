@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pynuin.main.zernike import wfe, get_coeff_from_rms
-from pynuin.main.optics import aperture, normalize_apertures
+from pynuin.main.optics import aperture, normalize_apertures, normalize_apertures2
 from numpy.fft import fft2, ifft2, fftshift
 # from scipy.fftpack import fft2, fftshift, ifft2
 from matplotlib.colors import LogNorm
@@ -20,7 +20,7 @@ lam = 1 #1e-5 #m
 D1 = 20 #0.01 #m
 D2 = 2 * 1.22 * (lam/D1) * n #lam/D (units)
 list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
-rms = 0.1*lam
+rms = 0.021*lam
 
 D1_2 = D1/2 #m
 D2_2 = D2/2 #lam/D (units)
@@ -40,6 +40,8 @@ a1_id = aperture(D = D1,
                  list_wfe = None,
                  n = n)
 
+# print(np.sum(a1_id)/np.count_nonzero(a1_id))
+
 # create aberrated aperture
 a1_ab = aperture(D = D1, 
                  lam = lam,
@@ -47,20 +49,26 @@ a1_ab = aperture(D = D1,
                  list_wfe = list_wfe,
                  n = n)
 
-
-
+# print(np.count_nonzero(a1_ab))
+# print(np.sum(a1_id) + np.sum(a1_ab))
 # print(np.sum(a1_id)/size/100)
 # a1_id = a1_id/size/100
 # a1_ab = a1_ab/size/100
+
 # normalize apertures
 # a1_id, a1_ab, a0 = normalize_apertures(a1_id, a1_ab, 1)
+# a1_id, a1_ab, a0 = normalize_apertures2(a1_id, a1_ab, 1)
+
+# print(a0)
+
+# print(type(a0))
+
+# print(((np.sum(a1_id) + np.sum(a1_ab)).real)**2)
 # a1_id = a1_id/size
 # a1_ab = a1_ab/size
-
 # print(a1_id.shape)
 # print(np.sum(a1_id))
 # print(np.sum(a1_ab))
-
 # print(a0)
 
 # create aperture in pinhole plane

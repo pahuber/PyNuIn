@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pynuin.main.zernike import wfe, get_coeff_from_rms
-from pynuin.main.optics import aperture, normalize_apertures
+from pynuin.main.optics import aperture, normalize_apertures2
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -10,7 +10,7 @@ from scipy.optimize import fsolve
 
 
 '''computational specifications'''
-n = 200
+n = 100
 size = n**2
 
 
@@ -18,7 +18,8 @@ size = n**2
 lam = 1 #1e-5 #m
 D1 = 20 #0.01 #m
 list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
-# list_wfe = [(5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
+# list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1), (6, 0), (6, 2), (6, 4), (6, 6), (6, -2), (6, -4), (6, -6), (7, 1), (7, 3), (7, 5), (7, 7), (7, -1), (7, -3), (7, -5), (7, -7)]
+# list_wfe = [(4, 4), (5, 5), (5, -5)]
 # list_wfe = [(2, 0)]
 pinholes = np.arange(1*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
 rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
@@ -59,9 +60,9 @@ for counter_rms, rms in enumerate(rmss):
     
     
     # normalize apertures
-    print("Normalizing")
-    a1_id, a1_ab, _ = normalize_apertures(a1_id, a1_ab, 1)
-    print("Ended normalizing")
+    # print("Normalizing")
+    # a1_id, a1_ab, _ = normalize_apertures2(a1_id, a1_ab, 1)
+    # print("Ended normalizing")
     
     
     for counter_pinhole, pinhole in enumerate(pinholes):
@@ -166,6 +167,8 @@ axs2.clabel(cs2, cs2.levels, inline=True, fmt="%1.2f", fontsize=10)
 
 cs22 = axs2.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
 axs2.clabel(cs22, cs22.levels, inline=True, fmt="%.0E", fontsize=10)
+
+# axs2.fill_between(pinholes, cs2, cs22)
 
 fig2.colorbar(img2, ax=axs2, fraction=0.046, pad=0.04)
 axs2.set_xticks(pinholes)

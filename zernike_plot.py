@@ -23,7 +23,7 @@ list_wfe = [(1, 1), (1, -1), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), 
 pinholes = np.arange(1*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
 # rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
 
-rms = 0.01*lam
+rms = 0.2*lam
 
 print(len(pinholes))
 print(len(list_wfe))

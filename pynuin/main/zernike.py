@@ -17,7 +17,7 @@ def r(n, m, r, r_max):
                     r_max (float): Maximum of radial coordinate, such that rho=r/r_max in [0, 1]
 
             Returns:
-                    r (): Radial part of Zernike polynomial
+                    (float): Radial part of Zernike polynomial
     '''
     
     # if n-m even
@@ -39,6 +39,19 @@ def r(n, m, r, r_max):
 
 # method to calculate full Zernike polynomial, i. e. radial plus angular part
 def z(n, m, rho, theta, rho_max=1):
+    '''
+    Returns the full Zernike polynomial Z_n^m.
+
+            Parameters:
+                    n (int): First index of Zernike polynomial
+                    m (int): Second index of Zernike polynomial
+                    r (float): Radial coordinate
+                    theta (float): Angular coordinate
+                    r_max (float): Maximum of radial coordinate, such that rho=r/r_max in [0, 1]
+
+            Returns:
+                    (float): Zernike polynomial
+    '''
     
     # check if valid input
     if n < 0 or m > n or abs(m) > n:
@@ -55,7 +68,19 @@ def z(n, m, rho, theta, rho_max=1):
 def wfe(indices_coeffs,
         rho,
         theta,
-        rho_max=1):
+        rho_max):
+    '''
+    Returns a wavefront error composed of a sum of several Zernike polynomial terms Z_n^m.
+
+            Parameters:
+                    indices_coeffs (list): List containing tuples of the kind (n, m, coeff)
+                    r (float): Radial coordinate
+                    theta (float): Angular coordinate
+                    r_max (float): Maximum of radial coordinate, such that rho=r/r_max in [0, 1]
+
+            Returns:
+                    (float): Wavefront error
+    '''
     
     summation = 0
     for el in indices_coeffs:
@@ -99,5 +124,15 @@ def wfe(indices_coeffs,
 
 
 def get_coeff_from_rms(rms, indices):
+    '''
+    Returns the coefficient z_n^m = z of a sum of Zernike polynomials assuming the same coefficient for each contribution.
+
+            Parameters:
+                    rms (float): Total root mean square wavefront aberration
+                    indices (list): List containing tuples of the kind (n, m)
+
+            Returns:
+                    (float): Zernike polynomial coefficient
+    '''
     
     return abs(rms/np.sqrt(len(indices)))

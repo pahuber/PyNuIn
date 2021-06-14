@@ -1,6 +1,7 @@
 import numpy as np
 from pynuin.main.zernike import wfe
 from scipy.optimize import fsolve
+from mpmath import findroot
         
 
 # # method to create aperture matrices
@@ -72,7 +73,7 @@ def aperture(D = 1.,
                     n (int): Number to specify shape of array, i. e. n x n
 
             Returns:
-                    aperture (array): Complex array containing a circular aperture of diameter D
+                    (array): Complex array containing a circular aperture of diameter D
     '''
     
     # create 1-dimensional x and y arrays
@@ -141,21 +142,21 @@ def normalize_apertures(a1,
         # solve for roots, i. e. real part of amplitude a0
         a0_real = fsolve(func, 1)[0]
         
-        def func(a0_imag_new):
+        def func2(a0_imag_new):
             
-            func = 0
+            func2 = 0
             
             for el1 in aperture_total:
                 for el2 in el1:
                     z_real = el2.real
                     z_imag = el2.imag
                     
-                    func += abs(a0_real*z_real - a0_imag_new*z_imag)**2
+                    func2 += abs(a0_real*z_real - a0_imag_new*z_imag)**2
                     
-            return func - intensity_init
+            return func2 - intensity_init
         
         # solve for roots, i. e. imaginary part of amplitude a0
-        a0_imag_new = fsolve(func, 1)[0]
+        a0_imag_new = fsolve(func2, 1)[0]
         
         # define full complex amplitude a0
         a0_total = a0_real + a0_imag_new*1j
@@ -163,6 +164,80 @@ def normalize_apertures(a1,
         # check normalization
         
         intensity_init_check = np.sum(abs(((a0_total*a1+a0_total*a2).real)**2))
+        # print(intensity_init_check)
+        counter += 1
+    
+    # print(intensity_init_check)
+    
+    if counter != 1:
+        print("Normalization succesfull")
+    
+    return a0_total*a1, a0_total*a2, a0_total
+
+
+def normalize_apertures2(a1,
+                        a2,
+                        intensity_init):
+
+    intensity_init_check = 0
+    counter = 0
+    a0_imag_new = 0
+    
+    while round(intensity_init_check, 2) != float(intensity_init):
+        
+        if counter != 0:
+            print("Renormalizing...")
+                
+        # normalize this amplitude to unit intensity
+        aperture_total  = a1 + a2
+        # amplitude_init = np.sum(aperture_total)
+        
+        # choose initial amplitude imaginary part because of degeneracy
+        # if counter == 0:
+        #     a0_imag = amplitude_init.imag
+        # else:
+        #     a0_imag = a0_imag_new
+        
+        # define function to find roots for
+        def func(a0_total):
+            
+            func = 0
+            
+            for el1 in aperture_total:
+                for el2 in el1:
+                    
+                    func += abs(a0_total * el2)**2
+                    
+            return func - intensity_init
+        
+        # solve for roots, i. e. real part of amplitude a0
+        a0_total = findroot(func, 1)
+        print(float(a0_total))
+        a0_total = float(a0_total)
+        
+        # def func2(a0_imag_new):
+            
+        #     func2 = 0
+            
+        #     for el1 in aperture_total:
+        #         for el2 in el1:
+        #             z_real = el2.real
+        #             z_imag = el2.imag
+                    
+        #             func2 += abs(a0_real*z_real - a0_imag_new*z_imag)**2
+                    
+        #     return func2 - intensity_init
+        
+        # solve for roots, i. e. imaginary part of amplitude a0
+        # a0_imag_new = fsolve(func2, 1)[0]
+        
+        # define full complex amplitude a0
+        # a0_total = a0_real + a0_imag_new*1j
+        
+        # check normalization
+        
+        intensity_init_check = np.sum(abs(((a0_total*a1+a0_total*a2).real)**2))
+        print(intensity_init_check)
         # print(intensity_init_check)
         counter += 1
     
