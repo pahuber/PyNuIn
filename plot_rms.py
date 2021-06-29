@@ -16,12 +16,12 @@ size = n**2
 
 '''physical specifications'''
 lam = 1 #1e-5 #m
-D1 = 20 #0.01 #m
+D1 = 1*20 #0.01 #m
 list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
 # list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1), (6, 0), (6, 2), (6, 4), (6, 6), (6, -2), (6, -4), (6, -6), (7, 1), (7, 3), (7, 5), (7, 7), (7, -1), (7, -3), (7, -5), (7, -7)]
 # list_wfe = [(4, 4), (5, 5), (5, -5)]
 # list_wfe = [(2, 0)]
-pinholes = np.arange(1*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
+pinholes = np.arange(0.2*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
 rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
 
 print(len(pinholes))
@@ -129,7 +129,7 @@ ppixel = (pmax-pmin)/len(pinholes)/2
 rpixel = (rmax-rmin)/len(rmss)/2
 extent = [pmin-ppixel, pmax+ppixel, rmin-rpixel, rmax+rpixel]
 aspect = ((pmax-pmin)/output_null.shape[1]) / ((rmax-rmin)/output_null.shape[0])
-tcontours = [0.75, 0.80, 0.85, 0.90]
+tcontours = [0.5, 0.7, 0.80, 0.85, 0.90]
 # tcontours = [0.1, 0.15, 0.2]
 ncontours = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 cmap = "viridis"

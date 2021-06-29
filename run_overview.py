@@ -1,9 +1,9 @@
 #%%
 import numpy as np
-import matplotlib.pyplot as plt
-from pynuin.main.zernike import wfe, get_coeff_from_rms, r
+#import matplotlib.pyplot as plt
+from pynuin.main.zernike import wfe, get_coeff_from_rms, r, noll_index
 from pynuin.main.optics import aperture
-from pynuin.util.plot import plot_wfe
+from pynuin.util.plot import plot_zernike_wfe
 from numpy.fft import fft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -28,7 +28,7 @@ xymax = 0.05
 steps = 500
 size = steps**2
 
-# a1_id = aperture(D = D1, 
+# a1_id = aperture(D = D1,
 #               lam = lam,
 #               a0 = 1,
 #               list_wfe = None,
@@ -42,7 +42,7 @@ size = steps**2
 # plt.show()
 
 
-# a2 = aperture2(D = 20, 
+# a2 = aperture2(D = 20,
 #              lam = 1,
 #              a0 = 1,
 #              list_wfe = [(2, 2, 0.5)],
@@ -56,9 +56,13 @@ size = steps**2
 # plt.colorbar()
 # plt.show()
 
-list_wfe = [(1, -1, 1), (1, 1, 1), (2, 0, 1), (2, 2, 1), (2, -2, 1), (3, 0, 1), (3, 3, 1), (3, -3, 1), (3, 1, 1), (3, -1, 1), (4, 0, 1), (4, 2, 1), (4, -2, 1), (4, 4, 1), (4, -4, 1)]
+# list_wfe = [(1, -1, 1), (1, 1, 1), (2, 0, 1), (2, 2, 1), (2, -2, 1), (3, 0, 1), (3, 3, 1), (3, -3, 1), (3, 1, 1), (3, -1, 1), (4, 0, 1), (4, 2, 1), (4, -2, 1), (4, 4, 1), (4, -4, 1)]
 
-plot_wfe(list_wfe)
+list_wfe = [(6, 0, 1)]
+
+print(noll_index(5, -5))
+
+#plot_wfe(list_wfe)
 
 
 # list_wfe_rms = [(1, -1), (1, 1), (2, -2), (4, 2)]
@@ -77,7 +81,7 @@ plot_wfe(list_wfe)
 # list_wfe_rms2 = [(1, -1, coeff), (1, 1, coeff)]
 
 
-# plot_wfe(list_wfe_rms)
+plot_wfe(list_wfe)
 
 
 
@@ -87,17 +91,17 @@ plot_wfe(list_wfe)
 # '''calculations'''
 # for counterx, elx in enumerate(x):
 #     for countery, ely in enumerate(y):
-        
+
 #         # perform transformation to polar coordinates
 #         ra = np.sqrt(elx**2+ely**2)
 #         the = np.arctan2(ely, elx)
-        
+
 #         # define constants
 #         a0 = 1
 #         D_2 =0.5
 #         lam = 1e-5
 #         # rho_max = np.sqrt(max(x)**2+max(y)**2)
-        
+
 #         # specify wafefront error
 #         list_wfe = [(0, 0, 0.5e-5), (1, 1, 0e-5), (1, -1, 0e-5)]
 #         wfe_gen = float(wfe(list_wfe, ra, the))
@@ -105,7 +109,7 @@ plot_wfe(list_wfe)
 
 #         # ideal e field
 #         e_ideal[counterx][countery] = a0*np.heaviside(D_2-ra, 1)*np.heaviside(ra, 1)
-        
+
 #         # aberrated e field
 #         e_aberrated[counterx][countery] = a0*np.heaviside(D_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
 
