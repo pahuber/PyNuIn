@@ -1,9 +1,7 @@
 import numpy as np
-import sympy as sym
 from math import factorial
 from pynuin.util.general import kronecker_delta
 from scipy.optimize import fsolve
-from scipy.integrate import dblquad
 
 
 def n_m_from_noll(j):
@@ -152,24 +150,33 @@ def get_coeff_from_rms(rms, indices):
     return abs(rms/np.sqrt(len(indices)))
 
 
-def get_distribution_from_rms(rms, indices, a):
+def get_distribution_from_rms(rms, indices, slope):
     '''
     Returns the coefficient z_n^m = z of a sum of Zernike polynomials assuming the same coefficient for each contribution.
 
             Parameters:
                     rms (float): Total root mean square wavefront aberration
                     indices (list): List of tuples of the kind (j,), where j is the Zernike poylnomial index according to Noll's convention, should be ordered from lowest to highest
+                    slope (float): slope of the distribution of Zernike polynomial coefficients, i. e. difference between coefficient z_i and z_(i+1)
 
             Returns:
-                    (float): Zernike polynomial coefficient
+                    (list): List of tuples of the kind (j, coefficient)
     '''
     
+    # define function to be solved numerically to find first coefficient z_1
+    def func(z_1):
+        summation = 0
+        for i in range(len(indices)):
+            summation += (z_1 - i * slope)**2
+            
+        return np.sqrt(summation) - rms
+
+    # solve for z_1
+    z_1 = fsolve(func, 1)[0]
     
+    # define all coefficients by iteratively subtracting the slope from the previouse coefficient, starting with z_1
     for counter, el in enumerate(indices):
-        if counter == 0:
-            coeff = abs(rms/(np.sqrt(len(indices) * a)))
-        else:
-            coeff /= a
+        coeff = z_1 - counter * slope
             
         indices[counter] += (coeff,)
 

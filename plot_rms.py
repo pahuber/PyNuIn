@@ -1,8 +1,9 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from pynuin.main.zernike import wfe, get_coeff_from_rms
+from pynuin.main.zernike import wfe, get_coeff_from_rms, get_distribution_from_rms
 from pynuin.main.optics import aperture
+from pynuin.util.plot import plot_zernike_distribution
 from numpy.fft import fft2, ifft2, fftshift
 from matplotlib.colors import LogNorm
 from matplotlib import ticker
@@ -19,10 +20,10 @@ lam = 1 #1e-5 #m
 D1 = 1*20 #0.01 #m
 # list_wfe = [(2, 0), (2, 2), (2, -2), (3, 1), (3, -1), (3, 3), (3, -3), (4, 0), (4, 2), (4, -2), (4, 4), (4, -4), (5, 5), (5, 3), (5, 1), (5, -5), (5, -3), (5, -1)]
 list_wfe = []
-for i in range(4, 21+1, 1):
+for i in range(10, 21+1, 1):
     list_wfe.append((i,))
 
-pinholes = np.arange(0.2*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
+pinholes = np.arange(0.2*lam/D1*n, 5.2*lam/D1*n, 0.2*lam/D1*n)
 rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
 
 print(len(pinholes))
@@ -39,9 +40,17 @@ for counter_rms, rms in enumerate(rmss):
     
     '''rms to zernike coefficient calculations'''
     list_wfe2 = list_wfe.copy()
-    coeff = get_coeff_from_rms(rms, list_wfe2)
-    for index in range(len(list_wfe)):
-        list_wfe2[index] += (coeff,)
+    
+    # equally distributed
+    # coeff = get_coeff_from_rms(rms, list_wfe2)
+    # for index in range(len(list_wfe)):
+    #     list_wfe2[index] += (coeff,)
+    
+    # unequally distibuted, decreasing values
+    list_wfe2 = get_distribution_from_rms(rms, list_wfe2, rms/23.600725) # 40, such that the slope is that no coefficients are negative
+    
+    # plot distributions
+    # plot_zernike_distribution(list_wfe2, normalized=True)
     
     
     '''create apertures'''
@@ -92,8 +101,8 @@ for counter_rms, rms in enumerate(rmss):
         e_minus = e_final_id - e_final_ab
         
         # calculate intensity in final plane
-        intensity_max = abs(e_plus.real)**2
-        intensity_min = abs(e_minus.real)**2
+        intensity_max = abs(e_plus)**2
+        intensity_min = abs(e_minus)**2
         
         # define null
         imax = np.sum(intensity_max)
@@ -102,7 +111,7 @@ for counter_rms, rms in enumerate(rmss):
         # print(null)
         
         # calculate initial common intensity, should equal intensity_init from above, i. e. I_init total (|E_1 + E_2|^2)
-        iinit_common = np.sum(abs((a1_id + a1_ab).real)**2)
+        iinit_common = np.sum(abs((a1_id + a1_ab))**2)
         
         # define throughput
         throughput = imax/iinit_common
@@ -151,7 +160,7 @@ fig1.colorbar(img1, ax=axs1, fraction=0.046, pad=0.04)
 axs1.set_xticks(pinholes)
 axs1.set_xticklabels((pinholes/lam/n*D1).round(2))
 axs1.set_yticks(rmss)
-axs1.set_title("Throughput")
+axs1.set_title("Throughput (D1)")
 plt.xlabel("Pinhole Diameter [$\lambda/D$]")
 plt.ylabel("RMS [$\lambda$]")
 plt.xticks(rotation=90, fontsize=7)
@@ -175,7 +184,7 @@ fig2.colorbar(img2, ax=axs2, fraction=0.046, pad=0.04)
 axs2.set_xticks(pinholes)
 axs2.set_xticklabels((pinholes/lam/n*D1).round(2))
 axs2.set_yticks(rmss)
-axs2.set_title("Null Depth")
+axs2.set_title("Null Depth (D1)")
 plt.xlabel("Pinhole Diameter [$\lambda/D$]")
 plt.ylabel("RMS [$\lambda$]")
 plt.xticks(rotation=90, fontsize=7)
@@ -184,3 +193,6 @@ plt.yticks(fontsize=7)
 fig2.savefig("output/rms_null.pdf", bbox_inches = 'tight', pad_inches = 0)
 
 plt.show()
+
+# plot distirbution
+plot_zernike_distribution(list_wfe2, normalized=True, name="output/rms_distro.pdf", title="Equally Distributed Coefficients (D1)")

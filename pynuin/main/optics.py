@@ -29,8 +29,8 @@ def aperture(D = 1.,
     y = n / 2 - i
         
     # convert to 2-dimensional arrays
-    X = x[:, np.newaxis]
-    Y = y[np.newaxis, :]
+    Y = y[:, np.newaxis]
+    X = x[np.newaxis, :]
     
     # define radius
     R = D/2

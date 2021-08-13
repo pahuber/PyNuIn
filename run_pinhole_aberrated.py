@@ -11,10 +11,21 @@ from scipy.optimize import fsolve
 
 '''definitions'''
 lam = 1 #1e-5 #m
-D1 = 2 #0.01 #m
-D2 = 8 * 1.22 * (lam/D1) #lam/D (units)
-list_wfe = [(2, -2), (2, 2)]
-rms = lam/2
+D1 = 0.5 #0.01 #m
+D2 = 0.2 * (lam/D1) #lam/D (units)
+
+# list_wfe = [(2, -2), (2, 2)]
+
+# rms = lam/10
+
+
+list_wfe = []
+for i in range(5, 21+1, 1):
+    list_wfe.append((i,))
+
+rms = 0.1
+
+
 
 D1_2 = D1/2 #m
 D2_2 = D2/2 #lam/D (units)
@@ -49,46 +60,48 @@ e_diff = np.zeros((len(x), len(y)), dtype=complex)
 
 
 
-'''amplitude normalization'''
-for counterx, elx in enumerate(x):
-    for countery, ely in enumerate(y):
+# '''amplitude normalization'''
+# for counterx, elx in enumerate(x):
+#     for countery, ely in enumerate(y):
         
-        # perform transformation to polar coordinates
-        ra = np.sqrt(elx**2+ely**2)
-        the = np.arctan2(ely, elx)
+#         # perform transformation to polar coordinates
+#         ra = np.sqrt(elx**2+ely**2)
+#         the = np.arctan2(ely, elx)
         
-        # specify wavefront error
-        wfe_gen = float(wfe(list_wfe, ra, the, D1_2))
+#         # specify wavefront error
+#         wfe_gen = float(wfe(list_wfe, ra, the, D1_2))
         
-        # define aprture 1
-        aperture1norm[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
+#         # define aprture 1
+#         aperture1norm[counterx][countery] = 1*np.heaviside(D1_2-ra, 1)*np.heaviside(ra, 1)*np.exp(-2*np.pi*1j*wfe_gen/lam)
 
-# normalize this amplitude to unit intensity
-amplitude_temp = np.sum(aperture1norm)
+# # normalize this amplitude to unit intensity
+# amplitude_temp = np.sum(aperture1norm)
 
-# choose initial amplitude imaginary part because of degeneracy
-a0_imag = amplitude_temp.imag
+# # choose initial amplitude imaginary part because of degeneracy
+# a0_imag = amplitude_temp.imag
 
-# define function to find roots for
-def func(a0_real):
+# # define function to find roots for
+# def func(a0_real):
     
-    func = 0
+#     func = 0
     
-    for el1 in aperture1norm:
-        for el2 in el1:
-            z_real = el2.real
-            z_imag = el2.imag
+#     for el1 in aperture1norm:
+#         for el2 in el1:
+#             z_real = el2.real
+#             z_imag = el2.imag
             
-            func += abs(a0_real*z_real - a0_imag*z_imag)**2
+#             func += abs(a0_real*z_real - a0_imag*z_imag)**2
             
-    return func - 1
+#     return func - 1
 
-# solve for roots, i. e. real part of amplitude a0
-a0_real = fsolve(func, 1)[0]
+# # solve for roots, i. e. real part of amplitude a0
+# a0_real = fsolve(func, 1)[0]
 
-# define full complex amplitude a0
-a0 = a0_real + a0_imag*1j
+# # define full complex amplitude a0
+# a0 = a0_real + a0_imag*1j
 
+
+a0 = 1
 
 
 '''calculations'''
@@ -115,17 +128,17 @@ for counterx, elx in enumerate(x):
         
         # e field in aperture 1 plane
         e_field_a1 = fftshift(fft2(aperture1))
-        intensity_a1 = abs(e_field_a1.real)**2
+        intensity_a1 = abs(e_field_a1)**2
         
         # e field in aperture 2 plane
         e_field_a2 = e_field_a1 * aperture2prime
-        intensity_a2 = abs(e_field_a2.real)**2
+        intensity_a2 = abs(e_field_a2)**2
         
         # e field in imaging plane
         e_field = ifft2(e_field_a2)
         
         # calculate intensity in image plane
-        intensity = abs(e_field.real)**2
+        intensity = abs(e_field)**2
         
 
         # # ideal e field
@@ -146,7 +159,7 @@ for counterx, elx in enumerate(x):
 # null = irr_min/irr_max
         
 # print initial intensity
-print(np.sum(abs(aperture1.real)**2))
+print(np.sum(abs(aperture1)**2))
 
 
 '''plotting'''
@@ -218,6 +231,11 @@ plt.subplots_adjust(wspace=-0.2, hspace=0.71)
 plt.savefig("plot.pdf")
 plt.show()
 
+
+toplot = intensity_a1
+
+plt.imshow(toplot)
+plt.imsave("output/1.pdf", toplot)
 
 
 # plt.imshow(null, norm=LogNorm())

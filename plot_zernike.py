@@ -22,10 +22,10 @@ list_wfe = []
 for i in range(1, 21+1, 1):
     list_wfe.append((i,))
 
-pinholes = np.arange(1*lam/D1*n, 6*lam/D1*n, 0.2*lam/D1*n)
+pinholes = np.arange(0.2*lam/D1*n, 5.2*lam/D1*n, 0.2*lam/D1*n)
 # rmss = np.arange(0.001*lam, 0.026*lam, 0.001*lam)
 
-rms = 0.2*lam
+rms = 0.005*lam
 
 print(len(pinholes))
 print(len(list_wfe))
@@ -136,7 +136,7 @@ ppixel = (pmax-pmin)/len(pinholes)/2
 rpixel = (rmax-rmin)/len(list_wfe)/2
 extent = [pmin-ppixel, pmax+ppixel, rmin-rpixel, rmax+rpixel]
 aspect = ((pmax-pmin)/output_null.shape[1]) / ((rmax-rmin)/output_null.shape[0])
-tcontours = [0.75, 0.80, 0.85, 0.90]
+tcontours = [0.5, 0.7, 0.80, 0.85, 0.90]
 # tcontours = [0.1, 0.15, 0.2]
 ncontours = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 cmap = "viridis"
@@ -148,8 +148,8 @@ ncolor="black"
 fig1, axs1 = plt.subplots(1, 1)
 img1 = axs1.imshow(output_throughput, extent=extent, aspect=aspect, origin="lower", cmap=cmap)
 
-# cs1 = axs1.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
-# axs1.clabel(cs1, cs1.levels, inline=True, fmt="%1.2f", fontsize=10)
+cs1 = axs1.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
+axs1.clabel(cs1, cs1.levels, inline=True, fmt="%1.2f", fontsize=10)
 
 # cs12 = axs1.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
 # axs1.clabel(cs12, cs12.levels, inline=True, fmt="%.0E", fontsize=10)
@@ -161,7 +161,7 @@ axs1.set_yticks(np.arange(1, len(list_wfe)+1))
 axs1.set_yticklabels(wfe_labels)
 axs1.set_title("Throughput (RMS: " + str(rms/lam) + " $\lambda$)")
 plt.xlabel("Pinhole Diameter [$\lambda/D$]")
-plt.ylabel("Zernike Polynomial $Z_n^m$ [$n, m$]")
+plt.ylabel("$j$ ($Z_j$)")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
@@ -171,8 +171,8 @@ fig1.savefig("output/zernike_throughput.pdf", bbox_inches = 'tight', pad_inches 
 fig2, axs2 = plt.subplots(1, 1)
 img2 = axs2.imshow(output_null, norm=LogNorm(), extent=extent, aspect=aspect, origin="lower", cmap=cmap_r)
 
-# cs2 = axs2.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
-# axs2.clabel(cs2, cs2.levels, inline=True, fmt="%1.2f", fontsize=10)
+cs2 = axs2.contour(output_throughput, tcontours, colors=tcolor, extent=extent, linewidths=1.5)
+axs2.clabel(cs2, cs2.levels, inline=True, fmt="%1.2f", fontsize=10)
 
 # cs22 = axs2.contour(output_null, ncontours, colors=ncolor, extent=extent, linewidths=1.5)
 # axs2.clabel(cs22, cs22.levels, inline=True, fmt="%.0E", fontsize=10)
@@ -184,7 +184,7 @@ axs2.set_yticks(np.arange(1, len(list_wfe)+1))
 axs2.set_yticklabels(wfe_labels)
 axs2.set_title("Null Depth (RMS: " + str(rms/lam) + " $\lambda$)")
 plt.xlabel("Pinhole Diameter [$\lambda/D$]")
-plt.ylabel("Zernike Polynomial $Z_n^m$ [$n, m$]")
+plt.ylabel("$j$ ($Z_j$)")
 plt.xticks(rotation=90, fontsize=7)
 plt.yticks(fontsize=7)
 
